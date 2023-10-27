@@ -1,8 +1,8 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbullseye
+FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 
-LABEL maintainer="github@sytone.com" \
-      org.opencontainers.image.authors="github@sytone.com" \
-      org.opencontainers.image.source="https://github.com/sytone/obsidian-remote" \
+LABEL maintainer="philmichel@github.com" \
+      org.opencontainers.image.authors="philmichel@github.com" \
+      org.opencontainers.image.source="https://github.com/philmichel/obsidian-remote" \
       org.opencontainers.image.title="Container hosted Obsidian MD" \
       org.opencontainers.image.description="Hosted Obsidian instance allowing access via web browser"
 
@@ -12,12 +12,10 @@ RUN echo "**** install packages ****" && \
     apt-get install -y --no-install-recommends curl libgtk-3-0 libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass && \
     apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
 
-# Set version label
-ARG OBSIDIAN_VERSION=1.4.13
-
 # Download and install Obsidian
 RUN echo "**** download obsidian ****" && \
-    curl --location --output obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/obsidian_${OBSIDIAN_VERSION}_amd64.deb" && \
+    file_url=$(curl -s "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" | grep "browser_download_url.*deb" | cut -d : -f 2,3 | tr -d \") && \
+    curl --location --output obsidian.deb $file_url && \
     dpkg -i obsidian.deb
 
 # Environment variables
@@ -26,7 +24,7 @@ ENV CUSTOM_PORT="8080" \
     CUSTOM_USER="" \
     PASSWORD="" \
     SUBFOLDER="" \
-    TITLE="Obsidian v${OBSIDIAN_VERSION}" \
+    TITLE="Obsidian Remote" \
     FM_HOME="/vaults"
 
 # Add local files
